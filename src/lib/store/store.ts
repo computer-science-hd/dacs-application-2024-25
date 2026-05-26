@@ -16,7 +16,7 @@ function loadData(){
         if (!isValidDataFormat(data)) {
             throw new Error('Discarding old data because DataFormat is invalid or changed')
         }       
-        return data;
+        return normalizeLectures(data);
     } catch {
         return generateEmptyDataObject(formExtendDetails, formQuestions);
     }
@@ -41,6 +41,7 @@ export async function loadEvalData(filename: string){
             } */ 
            
             data = expandSkills(data);
+            data = normalizeLectures(data);
             return data;
 
         } catch (error) {
@@ -48,6 +49,28 @@ export async function loadEvalData(filename: string){
             return generateEmptyDataObject(formExtendDetails, formQuestions);
         }
     }
+}
+
+function normalizeLectures(data: Data): Data {
+    const skillTopicMap = formTopics.reduce((map, topic) => {
+        topic.subtopics.forEach((skill) => map[skill] = topic.name);
+        return map;
+    }, {} as Record<Skill, string>);
+
+    data.lectures = data.lectures.map((lecture: any) => ({
+        ...lecture,
+        topic: lecture.topic ?? findLectureTopic(lecture, skillTopicMap),
+    }));
+
+    return data;
+}
+
+function findLectureTopic(lecture: Lecture, skillTopicMap: Record<Skill, string>) {
+    const firstSelectedSkill = Object.entries(lecture.skills).find(([, value]) => value)?.[0];
+
+    if (!firstSelectedSkill) return null;
+
+    return skillTopicMap[firstSelectedSkill] ?? null;
 }
 
 function expandSkills(data: any): any{
@@ -89,8 +112,7 @@ function generateEmptyDataObject(extentDetails: ExtentDetails, questions: Questi
 		data['extentDetails'][extentDetail] = null
 	} 
 	
-    /* add first lecture for convienience */
-    data.lectures = [{ name: '', points: 0, description: '', subject: null, skills: {}}]
+    data.lectures = []
 	
     for (const question of questions) {
 		data['questions'][question] = '';
@@ -99,8 +121,8 @@ function generateEmptyDataObject(extentDetails: ExtentDetails, questions: Questi
 	return data;
 }
 
-export function addLecture(){
-    let newLecture: Lecture = { name: '', points: 0, description: '', subject: null, skills: {}}
+export function addLecture(topic: string | null = null){
+    let newLecture: Lecture = { name: '', points: 0, description: '', subject: null, skills: {}, topic}
 
     data.update((data: Data) => {
         data.lectures = [...data.lectures, newLecture]

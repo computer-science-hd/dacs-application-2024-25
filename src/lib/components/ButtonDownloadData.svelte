@@ -20,6 +20,7 @@ function stripFalseSkills(data: Data) {
         }
         strippedData.lectures[idx].skills = skills;
         delete strippedData.lectures[idx].confirmed;
+        delete strippedData.lectures[idx].topic;
     });
 
     return strippedData
