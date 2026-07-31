@@ -34,10 +34,11 @@ All data you enter stay within your browser, i.e., your contents are not sent to
 		<FormTableTopics />
 	</Card>
 
-	<Card size="xl" class="my-2">
+<!--	<Card size="xl" class="my-2">
 		<Heading tag="h3" class="mb-4 text-center">Lecture Assignment</Heading>
 		<FormLectureAssigment />
 	</Card>
+-->
 
 	<Card size="xl" class="my-2">
 		<Heading tag="h3" class="mb-4 text-center">Motivation</Heading>

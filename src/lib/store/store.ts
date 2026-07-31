@@ -90,7 +90,8 @@ function generateEmptyDataObject(extentDetails: ExtentDetails, questions: Questi
 	} 
 	
     /* add first lecture for convienience */
-    data.lectures = [{ name: '', points: 0, description: '', subject: null, skills: {}}]
+    /*data.lectures = [{ name: '', points: 0, description: '', subject: null, skills: {}}]*/
+    data.lectures = []; /* disabled, because lectures now have subject area from beginning */
 	
     for (const question of questions) {
 		data['questions'][question] = '';
@@ -99,13 +100,28 @@ function generateEmptyDataObject(extentDetails: ExtentDetails, questions: Questi
 	return data;
 }
 
-export function addLecture(){
+/*export function addLecture(){
     let newLecture: Lecture = { name: '', points: 0, description: '', subject: null, skills: {}}
 
     data.update((data: Data) => {
         data.lectures = [...data.lectures, newLecture]
         return data
     })
+}*/
+
+export function addLecture(subject: Subject | null = null) {
+	const newLecture: Lecture = {
+		name: '',
+		points: 0,
+		description: '',
+		subject,
+		skills: {}
+	};
+
+	data.update((currentData: Data) => {
+		currentData.lectures = [...currentData.lectures, newLecture];
+		return currentData;
+	});
 }
 
 export function deleteLecture(idx: number){
@@ -235,7 +251,7 @@ export function isValidFormData(data: Data){
     let exceptions: Record<string, Record<string, string>> = {
         "extentDetails": {},
         "lectures": {},
-        "subjectAreas": {},
+       /* "subjectAreas": {}, */
         "questions": {},
 
     }
@@ -281,11 +297,12 @@ export function isValidFormData(data: Data){
         }
     }
 
-    for (const subjectArea of formSubjectAreas){
+/*    for (const subjectArea of formSubjectAreas){
         if (countSubjectECTS(subjectArea.subject) < subjectArea.cp){
             exceptions["subjectAreas"][subjectArea.subject] = `- ${subjectArea.subject} has not enough declared ECTS points. ${subjectArea.cp - countSubjectECTS(subjectArea.subject)} points missing`;
         }
     }
+*/
 
     for (const [questionIdx, question] of formQuestions.entries()){
         if (data.questions[question] == '' ||
@@ -299,7 +316,7 @@ export function isValidFormData(data: Data){
     // check if isValid -- return
     if (Object.keys(exceptions["extentDetails"]).length === 0 &&
         Object.keys(exceptions["lectures"]).length === 0 &&
-        Object.keys(exceptions["subjectAreas"]).length === 0 &&
+        /* Object.keys(exceptions["subjectAreas"]).length === 0 && */
         Object.keys(exceptions["questions"]).length === 0
     ) return true;
 
@@ -323,7 +340,7 @@ export function isValidFormData(data: Data){
         } 
     } 
 
-    if (Object.keys(exceptions["subjectAreas"]).length > 0){
+/*    if (Object.keys(exceptions["subjectAreas"]).length > 0){
          alertString += "Lecture Assignment:\n"
 
         for (const exp of Object.keys(exceptions["subjectAreas"])){
@@ -332,6 +349,7 @@ export function isValidFormData(data: Data){
 
         alertString += "\n";
     } 
+*/
 
     if (Object.keys(exceptions["questions"]).length > 0){
         for (const exp of Object.keys(exceptions["questions"])){

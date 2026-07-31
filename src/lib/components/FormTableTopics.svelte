@@ -5,30 +5,20 @@ import {
 	Heading,
 	Input,
 	P,
-	Select,
 	Table,
 	TableBody,
 	TableBodyCell,
 	TableBodyRow,
 	TableHead,
-	TableHeadCell,
-	type SelectOptionType
+	TableHeadCell
 } from 'flowbite-svelte';
 import { TrashBinOutline }  from 'flowbite-svelte-icons';
 
 import PositiveNumberInput from './PositiveNumberInput.svelte';
 import GenericValidatedInput from './GenericValidatedInput.svelte';
-import { formTopics } from '$lib/topics';
+import { formTopicSections } from '$lib/topics';
 
 import { data, addLecture, deleteLecture, addSkill, checkDuplicateLecture } from '$lib/store/store';
-
-import { formSubjectAreas } from '$lib/subjectAreas';
-
-const subjectSelectionItems: Array<SelectOptionType<Subject>> =
-	formSubjectAreas.map((subjectArea) => ({
-		value: subjectArea.subject,
-		name: subjectArea.subject
-	}));
 
 </script>
 
@@ -41,13 +31,15 @@ For each lecture, provide its name as listed in your transcript (translated to E
 </P>
 <br>
 <P>
-However, you are <b>encouraged</b> to add relevant computer science or mathematics lectures without selecting a topic. These lectures will be included in the subject-area assignment but will not be counted as evidence for a specific basic skill.
+However, you are <b>encouraged</b> to add relevant computer science or mathematics lectures that do not provide a basic skill. These lectures will be included in the subject-area assignment but will not be counted as evidence for a specific basic skill.
 </P>
 <br>
 <P>
 When assigning credits to skills according to this form, the credits of a lecture may be distributed across several skills. In the subsequent calculations, each lecture contributes at most in total its actual number of credits, and there is an upper bound for the number of credits per skill. 
 </P>
-{#each formTopics as topic}
+<!--{#each formTopics as topic}-->
+{#each formTopicSections as section}
+	{#each section.topics as topic}
 <div class="my-4">
 	<Heading tag="h4" class="mb-4">{topic.name}</Heading>
 	<!--<Table class="overflow-x-auto" striped={true}>	-->
@@ -58,35 +50,46 @@ When assigning credits to skills according to this form, the credits of a lectur
 				<!--<TableHeadCell class="min-w-60 text-2xs p-2">Lecture Name in Transcript</TableHeadCell>-->
 				<TableHeadCell class="min-w-60 text-2xs p-2 text-center align-middle">Lecture Name in Transcript</TableHeadCell>
 				<!--<TableHeadCell class="w-12 text-2xs p-2">Points</TableHeadCell>-->
-				<TableHeadCell class="w-12 text-2xs p-2 text-center align-middle">Points</TableHeadCell>
+				<TableHeadCell class="w-12 text-2xs p-2 text-center align-middle">Credit points in your system</TableHeadCell>
 				{#each topic.subtopics as subTopic}
 					<!--<TableHeadCell class="text-2xs p-2 m-auto">{subTopic}</TableHeadCell>-->
 					<TableHeadCell class="text-2xs p-2 text-center align-middle">{subTopic}</TableHeadCell>
 				{/each}
 				<!--<TableHeadCell class="text-2xs p-2">Module Description</TableHeadCell>-->
-				<!--<TableHeadCell class="text-2xs p-2 text-center align-middle">Module Description</TableHeadCell>
-				<TableHeadCell class="text-2xs p-2"></TableHeadCell>-->
-				<TableHeadCell class="text-2xs p-2 text-center align-middle">Module Description	</TableHeadCell>
-				<TableHeadCell class="min-w-40 text-2xs p-2 text-center align-middle">Subject Area</TableHeadCell>
+				<TableHeadCell class="text-2xs p-2 text-center align-middle">Module Description</TableHeadCell>
 				<TableHeadCell class="text-2xs p-2"></TableHeadCell>
 			</TableHead>
 			<TableBody>
-				{#each $data.lectures as lecture, lectureIdx}
+				<!--{#each $data.lectures as lecture, lectureIdx}
 				<TableBodyRow>
 					<TableBodyCell class="p-2"><GenericValidatedInput type="text" bind:value={lecture.name} validateFn={() => checkDuplicateLecture(lectureIdx)} class="text-2xs"/></TableBodyCell>
 					<TableBodyCell class="p-2 text-2xs"><PositiveNumberInput bind:value={lecture.points} class="text-2xs text-center"/></TableBodyCell>
 					{#each topic.subtopics as subTopic}
 					<TableBodyCell class="p-2"><Checkbox bind:checked={lecture.skills[subTopic]} on:change={() => addSkill(lectureIdx, subTopic)} class="m-auto"/></TableBodyCell>
 					{/each}
-					<!--<TableBodyCell class="p-2 text-2xs"><Input type="text" bind:value={lecture.description} class="text-2xs"/></TableBodyCell>-->
 					<TableBodyCell class="p-2 text-2xs"><Input type="text" bind:value={lecture.description} class="text-2xs"/></TableBodyCell>
-					<TableBodyCell class="p-2 text-2xs"><Select items={subjectSelectionItems} bind:value={lecture.subject} class="text-2xs"/></TableBodyCell>	
 					<TableBodyCell class="p-2"><Button color="red" size="xs" class="text-2xs" on:click={() => deleteLecture(lectureIdx)}><TrashBinOutline /></Button></TableBodyCell>
 				</TableBodyRow>
+				{/each}-->
+				{#each $data.lectures as lecture, lectureIdx}
+				       {#if lecture.subject === section.subject}
+				       	    <TableBodyRow>
+						<TableBodyCell class="p-2"><GenericValidatedInput type="text" bind:value={lecture.name} validateFn={() => checkDuplicateLecture(lectureIdx)} class="text-2xs"/></TableBodyCell>
+					       	<TableBodyCell class="p-2 text-2xs"><PositiveNumberInput bind:value={lecture.points} class="text-2xs text-center"/></TableBodyCell>
+							       	{#each topic.subtopics as subTopic}
+							       		<TableBodyCell class="p-2"><Checkbox bind:checked={lecture.skills[subTopic]} on:change={() => addSkill(lectureIdx, subTopic)} class="m-auto"/></TableBodyCell>
+								{/each}
+
+						<TableBodyCell class="p-2 text-2xs"><Input type="text" bind:value={lecture.description} class="text-2xs"/></TableBodyCell>
+						<TableBodyCell class="p-2"><Button color="red" size="xs" class="text-2xs" on:click={() => deleteLecture(lectureIdx)}><TrashBinOutline /></Button></TableBodyCell>
+					    </TableBodyRow>
+					{/if}
 				{/each}
-			</TableBody>
+		      </TableBody>
 	</Table>
 	</div> <!-- -->
-	<Button class="text-2xs m-2" on:click={() => addLecture()}>Add Another Lecture</Button>
+	<!--<Button class="text-2xs m-2" on:click={() => addLecture()}>Add Another Lecture</Button>-->
+	<Button class="text-2xs m-2" on:click={() => addLecture(section.subject)}>Add Another Lecture</Button>
 </div>
+{/each}
 {/each}

@@ -99,3 +99,29 @@ export const formTopics: Topics = [
 		]
 	}
 ]
+
+export const formTopicSections: Array<{
+	subject: Subject;
+	topics: typeof formTopics;
+}> = [
+	{
+		subject: 'computer science',
+		topics: formTopics.filter((topic) =>
+			[
+				'Practical computer science',
+				'Technical computer science',
+				'Algorithms and data structures',
+				'Operating systems and networks',
+				'Software engineering',
+				'Theoretical computer science',
+				'Databases'
+			].includes(topic.name)
+		)
+	},
+	{
+		subject: 'mathematics',
+		topics: formTopics.filter((topic) =>
+			['Linear algebra', 'Calculus'].includes(topic.name)
+		)
+	}
+];
